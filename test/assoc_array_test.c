@@ -9,5 +9,6 @@ int main ( void ) {
   assoc_array ( &array );
   assoc_set ( &array, "voidness", (void*)&value );
   printf ( "and the number is .... : %i expected : %i \n", *((int*)assoc_get ( &array, "voidness" )), value);
+  assoc_print ( &array );
   return 0;
 }
