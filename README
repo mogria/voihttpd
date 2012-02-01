@@ -1,6 +1,7 @@
 voihttpd
 ========
 
-A Simple Webserver.
+A Simple Webserver written in C.
 
 Author: Mogria <m0gr14@gmail.com>
+LICENSE: GPLv3 (see LICENSE)
