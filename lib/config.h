@@ -33,7 +33,7 @@ struct assoc_array *read_config(char *filename) {
       
       contents[files.length - 1] = malloc ( sizeof ( char ) * 80 );
       int offset = 0;
-      while ( fgets(buf, BUFSIZE, file) != EOF ) {
+      while ( fgets(buf, BUFSIZE, file) != NULL) {
         int len = strlen(buf);
         strncpy(contents[files.length - 1] + offset, buf, len + 1);
         offset += len;
