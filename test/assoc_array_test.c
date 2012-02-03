@@ -20,5 +20,8 @@ int main ( void ) {
   printf ( "position : %i expected %i \n", array.position, -1);
   printf ( "res: %p expected %p \n", assoc_current(&array), NULL);
   assoc_print ( &array );
+  assoc_delete( &array, "voidness" );
+  assoc_print ( &array );
+  assoc_free( &array );
   return 0;
 }

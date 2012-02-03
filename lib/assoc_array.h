@@ -52,6 +52,7 @@ void assoc_free ( struct assoc_array *array );
 void *assoc_set ( struct assoc_array *array, const char *key, void *value );
 void *assoc_get ( struct assoc_array *array, const char *key );
 int assoc_exists ( struct assoc_array *array, const char *key );
+short assoc_delete( struct assoc_array *array, const char *key );
 int assoc_valid ( struct assoc_array *array );
 unsigned int assoc_next ( struct assoc_array *array );
 unsigned int assoc_prev ( struct assoc_array *array );
@@ -60,19 +61,19 @@ struct assoc_element *assoc_element ( struct assoc_array *array );
 void *assoc_current ( struct assoc_array *array );
 const char *assoc_key ( struct assoc_array *array );
 
-/* gcgcinitialize an array */
+/* initialize an array */
 void assoc_array ( struct assoc_array *array ) {
   array->length = 0;
   array->position = 0;
   array->elements = malloc(0 * sizeof(struct assoc_element));
 }
 
-/* gcgcfree the allocated memory of the array */
+/* free the allocated memory of the array */
 void assoc_free ( struct assoc_array *array ) {
   free(array->elements);
 }
 
-/* gcgcset the specified key to the specified value */
+/* set the specified key to the specified value */
 void *assoc_set ( struct assoc_array *array, const char *key, void *value ) {
   int ret;
   void *old_value = NULL;
@@ -87,13 +88,13 @@ void *assoc_set ( struct assoc_array *array, const char *key, void *value ) {
   return old_value;
 }
 
-/* gcgcget the value of the specified key */
+/* the value of the specified key */
 void *assoc_get ( struct assoc_array *array, const char *key ) {
   int ret = assoc_exists ( array, key );
   return ret == -1 ? NULL : array->elements[ret].value;
 }
 
-/* gcgcchecks if the given key exists */
+/* checks if the given key exists */
 int assoc_exists ( struct assoc_array *array, const char *key ) {
   int ret = -1;
   unsigned int old_pos = array->position;
@@ -106,17 +107,17 @@ int assoc_exists ( struct assoc_array *array, const char *key ) {
   return ret;
 }
 
-/* gcgcchecks of the position in the array is valid ( needed for iterating ) */
+/* checks of the position in the array is valid ( needed for iterating ) */
 int assoc_valid ( struct assoc_array *array ) {
   return array->position < array->length && array->position >= 0 ? 1 : 0;
 }
 
-/* gcgcmoves to the next element in the array */
+/* moves to the next element in the array */
 unsigned int assoc_next ( struct assoc_array *array ) {
   return ++array->position;
 }
 
-/* gcgcmoves to the previous element in the array */
+/* moves to the previous element in the array */
 unsigned int assoc_prev ( struct assoc_array *array ) {
   return --array->position;
 }
@@ -126,7 +127,7 @@ void assoc_rewind ( struct assoc_array *array ) {
   array->position = 0;
 }
 
-/* gcgcget the array element of the current position in the array */
+/* get the array element of the current position in the array */
 struct assoc_element *assoc_element ( struct assoc_array *array ) {
   struct assoc_element *ret = NULL;
   if ( assoc_valid ( array ) ) {
@@ -135,25 +136,41 @@ struct assoc_element *assoc_element ( struct assoc_array *array ) {
   return ret;
 }
 
-/* gcgcreturn the value of the current element */
+/* return the value of the current element */
 void *assoc_current ( struct assoc_array *array ) {
   struct assoc_element *element = assoc_element ( array );
   return element == NULL ? NULL : element->value;
 }
 
-/* gcgcreturn the key of the current element */
+/* return the key of the current element */
 const char *assoc_key ( struct assoc_array *array ) {
   struct assoc_element *element = assoc_element ( array );
   return element == NULL ? NULL : element->key;
 }
 
-/* gcgcprint out the whole array */
+/* print out the whole array */
 void assoc_print ( struct assoc_array *array ) {
   puts ("\nArray (" );
   for ( assoc_rewind ( array ); assoc_valid ( array ); assoc_next ( array ) ) {
     printf("\t'%s' => %p\n", assoc_key(array), assoc_current(array));
   }
   puts(")\n");
+}
+
+/* deletes the element with the given key from the array */
+short assoc_delete ( struct assoc_array *array, const char *key ) {
+  int pos;
+  short ret = 0;
+
+  if ( (pos = assoc_exists(array, key)) != -1 ) {
+    while ( pos < array->length ) {
+      array->elements[pos] = array->elements[pos + 1];
+      pos++;
+    }
+    array->elements = realloc(array->elements, --array->length * sizeof(struct assoc_element));
+    ret = 1;
+  }
+  return ret;
 }
 
 #endif /* _ASSOC_ARRAY_H */
