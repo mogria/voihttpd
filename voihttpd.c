@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 //network libraries
 #include <unistd.h>
@@ -8,12 +9,23 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "lib/assoc_array.h"
+#include "lib/config.h"
+
 
 #define BUFLEN 1024
 #define NAME "voihttpd"
 
 void handleHTTPRequest(int client_socket);
 void error(const char *msg, int nr);
+struct assoc_array *defaultConfig();
+
+struct assoc_array *getConfig() {
+  static struct assoc_array default_config;
+  assoc_array(&default_config);
+  assoc_set(&default_config, "port", "80");
+  return &default_config;
+}
 
 void handleHTTPRequest(int client_socket) {
   char buffer[BUFLEN];
@@ -56,17 +68,22 @@ int main(int argc, char *argv[]) {
   int clientsocketfd; //socket file descriptor of the client
   int pid;
   void (*handle)(int) = handleHTTPRequest;
+  struct assoc_array *config = getConfig();
+  struct assoc_array *additional_config = read_config("config");
+
+  // Copy over the things needed from the additional config
+  for(assoc_rewind(config); assoc_valid(config); assoc_next(config)) {
+    void *value = assoc_get(additional_config, assoc_current(config));
+    if(value != NULL) {
+      assoc_set(config, assoc_key(config), value);
+    }
+  }
+
 
   socklen_t clilen;
 
   struct sockaddr_in server_addr; //Server Adress
   struct sockaddr_in cli_addr; //Server Adress
-
-  // check if enougth arguments are given
-  if(argc < 2) {
-    fprintf(stderr, "%s: no port provided\n", NAME);
-    exit(1);
-  }
 
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if(sockfd < 0) {
@@ -76,7 +93,7 @@ int main(int argc, char *argv[]) {
   //initialize addr struct to zero
   bzero((char *) &server_addr, sizeof(server_addr));
 
-  port = atoi(argv[1]); //grab port number
+  port = atoi((char *)assoc_get(config, "port")); //grab port number
   
   //fill data into the server addr struct
   server_addr.sin_family = AF_INET;

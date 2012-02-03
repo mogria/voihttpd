@@ -72,7 +72,7 @@ void parse_config ( char *content, struct assoc_array *array) {
   char *current_idx = content;
   short is_key = 1;
   for (i = 0; i < length; i++ ) {
-    printf("c: %c\n", content[i]);
+    // printf("c: %c\n", content[i]);
     if ( content[i] == '\n' ) {
       // puts("is a line break, setting current char to 0, use next char as index");
       is_key = 1;
